@@ -10,6 +10,7 @@ import (
 // #cgo LDFLAGS: -lmarquise
 import "C"
 
+// Maintains the ZeroMQ context
 type MarquiseContext struct {
 	consumer   C.as_consumer
 	connection C.as_connection
@@ -37,7 +38,11 @@ func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
 	return *context, nil
 }
 
-// Need to free tagFields and tagValues as they're malloced
+// Translates a map of source tags to an array of CStrings of fields,
+// an array of CStrings of values and a size_t of the number of pairs.
+//
+// You need to free the two arrays of CStrings in the calling code,
+// after you've finished using them.
 func translateSource(source map[string]string) ([]*C.char, []*C.char, C.size_t) {
 	nTags := len(source)
 	tagFields := make([]*C.char, nTags)
@@ -51,6 +56,7 @@ func translateSource(source map[string]string) ([]*C.char, []*C.char, C.size_t) 
 	return tagFields, tagValues, C.size_t(nTags)
 }
 
+// Write a (UTF8) string value.
 func (c MarquiseContext) WriteText(source map[string]string, data string, timestamp uint64) error {
 	tagFields, tagValues, tagCount := translateSource(source)
 	for idx, _ := range tagFields {
@@ -70,6 +76,7 @@ func (c MarquiseContext) WriteText(source map[string]string, data string, timest
 	return nil
 }
 
+// Write a 64-bit int value.
 func (c MarquiseContext) WriteInt(source map[string]string, data int64, timestamp uint64) error {
 	tagFields, tagValues, tagCount := translateSource(source)
 	for idx, _ := range tagFields {
@@ -87,6 +94,7 @@ func (c MarquiseContext) WriteInt(source map[string]string, data int64, timestam
 	return nil
 }
 
+// Write a 64-bit float value.
 func (c MarquiseContext) WriteReal(source map[string]string, data float64, timestamp uint64) error {
 	tagFields, tagValues, tagCount := translateSource(source)
 	for idx, _ := range tagFields {
@@ -104,6 +112,7 @@ func (c MarquiseContext) WriteReal(source map[string]string, data float64, times
 	return nil
 }
 
+// Write an empty/'counter' value.
 func (c MarquiseContext) WriteCounter(source map[string]string, timestamp uint64) error {
 	tagFields, tagValues, tagCount := translateSource(source)
 	for idx, _ := range tagFields {
@@ -120,7 +129,7 @@ func (c MarquiseContext) WriteCounter(source map[string]string, timestamp uint64
 	return nil
 }
 
-
+// Write a binary blob/byte array.
 func (c MarquiseContext) WriteBinary(source map[string]string, data []byte, timestamp uint64) error {
 	tagFields, tagValues, tagCount := translateSource(source)
 	for idx, _ := range tagFields {
@@ -142,4 +151,3 @@ func (c MarquiseContext) WriteBinary(source map[string]string, data []byte, time
 	}
 	return nil
 }
-
