@@ -5,9 +5,9 @@ import (
 	"unsafe"
 )
 
-// #include <anchor_stats.h>
+// #include <marquise.h>
 // #include <stdint.h>
-// #cgo LDFLAGS: -lanchor_stats
+// #cgo LDFLAGS: -lmarquise
 import "C"
 
 type MarquiseContext struct {
