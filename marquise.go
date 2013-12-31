@@ -20,6 +20,10 @@ func newMarquiseWriteError(value string) error {
 	return fmt.Errorf("libmarquise returned -1 whilst trying to write frame with value %v", value)
 }
 
+func newMarquiseContextError(msg string) error {
+	return fmt.Errorf("Error initializing libmarquise context: %v", msg)
+}
+
 // zmqBroker is a string taking the form of a ZeroMQ URI. batchPeriod
 // is the interval at which the worker thread will poll/empty the queue
 // of messages.
@@ -34,7 +38,13 @@ func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
 	defer C.free(unsafe.Pointer(broker))
 	interval := C.double(batchPeriod)
 	context.consumer = C.as_consumer_new(broker, interval)
+	if context.consumer == nil {
+		return *context, newMarquiseContextError(fmt.Sprintf("as_consumer_new(%v, %v) returned NULL", broker, interval))
+	}
 	context.connection = C.as_connect(context.consumer)
+	if context.connection == nil {
+		return *context, newMarquiseContextError(fmt.Sprintf("as_connect(%v) returned NULL", context.consumer))
+	}
 	return *context, nil
 }
 
