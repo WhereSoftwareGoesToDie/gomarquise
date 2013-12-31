@@ -12,8 +12,8 @@ import "C"
 
 // Maintains the ZeroMQ context
 type MarquiseContext struct {
-	consumer   C.as_consumer
-	connection C.as_connection
+	consumer   C.marquise_consumer
+	connection C.marquise_connection
 }
 
 func newMarquiseWriteError(value string) error {
@@ -37,11 +37,11 @@ func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
 	broker := C.CString(zmqBroker)
 	defer C.free(unsafe.Pointer(broker))
 	interval := C.double(batchPeriod)
-	context.consumer = C.as_consumer_new(broker, interval)
+	context.consumer = C.marquise_consumer_new(broker, interval)
 	if context.consumer == nil {
 		return *context, newMarquiseContextError(fmt.Sprintf("as_consumer_new(%v, %v) returned NULL", broker, interval))
 	}
-	context.connection = C.as_connect(context.consumer)
+	context.connection = C.marquise_connect(context.consumer)
 	if context.connection == nil {
 		return *context, newMarquiseContextError(fmt.Sprintf("as_connect(%v) returned NULL", context.consumer))
 	}
@@ -79,7 +79,7 @@ func (c MarquiseContext) WriteText(source map[string]string, data string, timest
 	defer C.free(unsafe.Pointer(cStr))
 	cLen := C.size_t(len(data))
 	cTimestamp := C.uint64_t(timestamp)
-	writeResult := C.as_send_text(c.connection, cFields, cValues, tagCount, cStr, cLen, cTimestamp)
+	writeResult := C.marquise_send_text(c.connection, cFields, cValues, tagCount, cStr, cLen, cTimestamp)
 	if writeResult == -1 {
 		return newMarquiseWriteError(data)
 	}
@@ -97,7 +97,7 @@ func (c MarquiseContext) WriteInt(source map[string]string, data int64, timestam
 	cValues := &tagValues[0]
 	cInt := C.int64_t(data)
 	cTimestamp := C.uint64_t(timestamp)
-	writeResult := C.as_send_int(c.connection, cFields, cValues, tagCount, cInt, cTimestamp)
+	writeResult := C.marquise_send_int(c.connection, cFields, cValues, tagCount, cInt, cTimestamp)
 	if writeResult == -1 {
 		return newMarquiseWriteError(fmt.Sprintf("%v", data))
 	}
@@ -115,7 +115,7 @@ func (c MarquiseContext) WriteReal(source map[string]string, data float64, times
 	cValues := &tagValues[0]
 	cFloat := C.double(data)
 	cTimestamp := C.uint64_t(timestamp)
-	writeResult := C.as_send_real(c.connection, cFields, cValues, tagCount, cFloat, cTimestamp)
+	writeResult := C.marquise_send_real(c.connection, cFields, cValues, tagCount, cFloat, cTimestamp)
 	if writeResult == -1 {
 		return newMarquiseWriteError(fmt.Sprintf("%v", data))
 	}
@@ -132,7 +132,7 @@ func (c MarquiseContext) WriteCounter(source map[string]string, timestamp uint64
 	cFields := &tagFields[0]
 	cValues := &tagValues[0]
 	cTimestamp := C.uint64_t(timestamp)
-	writeResult := C.as_send_counter(c.connection, cFields, cValues, tagCount, cTimestamp)
+	writeResult := C.marquise_send_counter(c.connection, cFields, cValues, tagCount, cTimestamp)
 	if writeResult == -1 {
 		return newMarquiseWriteError("<EMPTY>")
 	}
@@ -155,7 +155,7 @@ func (c MarquiseContext) WriteBinary(source map[string]string, data []byte, time
 		buf[i] = C.uint8_t(val)
 	}
 	nBytes := C.size_t(len(data))
-	writeResult := C.as_send_binary(c.connection, cFields, cValues, tagCount, &buf[0], nBytes, cTimestamp)
+	writeResult := C.marquise_send_binary(c.connection, cFields, cValues, tagCount, &buf[0], nBytes, cTimestamp)
 	if writeResult == -1 {
 		return newMarquiseWriteError(fmt.Sprintf("%v", data))
 	}
