@@ -1,0 +1,3 @@
+language: go
+install:
+  - ./bin/install_deps.sh
