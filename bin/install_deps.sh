@@ -9,4 +9,4 @@ git clone https://github.com/anchor/libmarquise
 cd libmarquise
 autoreconf -i
 ./configure && make && make check 
-make install
+sudo make install
