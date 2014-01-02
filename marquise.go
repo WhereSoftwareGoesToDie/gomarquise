@@ -48,6 +48,10 @@ func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
 	return *context, nil
 }
 
+func (c MarquiseContext) Shutdown() {
+	C.marquise_consumer_shutdown(c.consumer)
+}
+
 // Translates a map of source tags to an array of CStrings of fields,
 // an array of CStrings of values and a size_t of the number of pairs.
 //
