@@ -10,6 +10,10 @@ import (
 // #cgo LDFLAGS: -lmarquise
 import "C"
 
+const (
+	Version = "1.0.2"
+)
+
 // Maintains the ZeroMQ context
 type MarquiseContext struct {
 	consumer   C.marquise_consumer
