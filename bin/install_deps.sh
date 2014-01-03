@@ -8,5 +8,5 @@ cd deps
 git clone https://github.com/anchor/libmarquise
 cd libmarquise
 autoreconf -i
-./configure && make && make check 
+./configure --prefix=/usr && make && make check 
 sudo make install
