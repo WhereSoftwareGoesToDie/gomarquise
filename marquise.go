@@ -1,3 +1,9 @@
+/*
+The gomarquise package consists of a set of bindings (using CGo) for the
+libmarquise[0] metric writer library.
+
+[0] https://github.com/anchor/libmarquise
+*/
 package gomarquise
 
 import (
