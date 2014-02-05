@@ -17,7 +17,7 @@ import (
 import "C"
 
 const (
-	Version = "1.0.4"
+	Version = "1.0.5"
 )
 
 // Maintains the ZeroMQ context
@@ -38,10 +38,10 @@ func newMarquiseContextError(msg string) error {
 // is the interval at which the worker thread will poll/empty the queue
 // of messages.
 //
-// Wraps C functions from anchor_stats.h:
+// Wraps C functions from marquise.h:
 //
-// - as_consumer_new
-// - as_connect
+// - marquise_consumer_new
+// - marquise_connect
 func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
 	context := new(MarquiseContext)
 	broker := C.CString(zmqBroker)
@@ -49,11 +49,11 @@ func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
 	interval := C.double(batchPeriod)
 	context.consumer = C.marquise_consumer_new(broker, interval)
 	if context.consumer == nil {
-		return *context, newMarquiseContextError(fmt.Sprintf("as_consumer_new(%v, %v) returned NULL", broker, interval))
+		return *context, newMarquiseContextError(fmt.Sprintf("marquise_consumer_new(%v, %v) returned NULL", broker, interval))
 	}
 	context.connection = C.marquise_connect(context.consumer)
 	if context.connection == nil {
-		return *context, newMarquiseContextError(fmt.Sprintf("as_connect(%v) returned NULL", context.consumer))
+		return *context, newMarquiseContextError(fmt.Sprintf("marquise_connect(%v) returned NULL", context.consumer))
 	}
 	return *context, nil
 }
