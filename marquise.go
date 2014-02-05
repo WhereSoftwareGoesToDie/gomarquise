@@ -2,6 +2,13 @@
 The gomarquise package consists of a set of bindings (using CGo) for the
 libmarquise[0] metric writer library.
 
+libmarquise recognizes two environment variables:
+
+ - LIBMARQUISE_ORIGIN specifies the origin value for the generated
+   DataFrames. This variable is required.
+ - LIBMARQUISE_DEBUG enables debugging output from the library if
+   defined.
+
 [0] https://github.com/anchor/libmarquise
 */
 package gomarquise
@@ -34,9 +41,14 @@ func newMarquiseContextError(msg string) error {
 	return fmt.Errorf("Error initializing libmarquise context: %v", msg)
 }
 
-// zmqBroker is a string taking the form of a ZeroMQ URI. batchPeriod
-// is the interval at which the worker thread will poll/empty the queue
-// of messages.
+// Dial connects to a chateau instance (broker) and returns a context
+// instance.
+//
+// zmqBroker is a string (taking the form of a ZeroMQ URI) at which the
+// destination chateau instance is to be found. 
+//
+// batchPeriod is the interval at which the worker thread will
+// poll/empty the queue of messages.
 //
 // Wraps C functions from marquise.h:
 //
@@ -49,10 +61,12 @@ func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
 	interval := C.double(batchPeriod)
 	context.consumer = C.marquise_consumer_new(broker, interval)
 	if context.consumer == nil {
+		// FIXME: do something useful with errno here
 		return *context, newMarquiseContextError(fmt.Sprintf("marquise_consumer_new(%v, %v) returned NULL", broker, interval))
 	}
 	context.connection = C.marquise_connect(context.consumer)
 	if context.connection == nil {
+		// FIXME: do something useful with errno here
 		return *context, newMarquiseContextError(fmt.Sprintf("marquise_connect(%v) returned NULL", context.consumer))
 	}
 	return *context, nil
