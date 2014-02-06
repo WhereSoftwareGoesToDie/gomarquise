@@ -53,6 +53,7 @@ func newMarquiseContextError(msg string) error {
 // Wraps C functions from marquise.h:
 //
 // - marquise_consumer_new
+//
 // - marquise_connect
 func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
 	context := new(MarquiseContext)
