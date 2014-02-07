@@ -74,6 +74,7 @@ func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
 }
 
 func (c MarquiseContext) Shutdown() {
+	C.marquise_close(c.connection)
 	C.marquise_consumer_shutdown(c.consumer)
 }
 
