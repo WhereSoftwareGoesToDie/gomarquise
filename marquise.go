@@ -1,3 +1,16 @@
+/*
+The gomarquise package consists of a set of bindings (using CGo) for the
+libmarquise[0] metric writer library.
+
+libmarquise recognizes two environment variables:
+
+ - LIBMARQUISE_ORIGIN specifies the origin value for the generated
+   DataFrames. This variable is required.
+ - LIBMARQUISE_DEBUG enables debugging output from the library if
+   defined.
+
+[0] https://github.com/anchor/libmarquise
+*/
 package gomarquise
 
 import (
@@ -9,6 +22,10 @@ import (
 // #include <stdint.h>
 // #cgo LDFLAGS: -lmarquise
 import "C"
+
+const (
+	Version = "1.0.5"
+)
 
 // Maintains the ZeroMQ context
 type MarquiseContext struct {
@@ -24,14 +41,20 @@ func newMarquiseContextError(msg string) error {
 	return fmt.Errorf("Error initializing libmarquise context: %v", msg)
 }
 
-// zmqBroker is a string taking the form of a ZeroMQ URI. batchPeriod
-// is the interval at which the worker thread will poll/empty the queue
-// of messages.
+// Dial connects to a chateau instance (broker) and returns a context
+// instance.
 //
-// Wraps C functions from anchor_stats.h:
+// zmqBroker is a string (taking the form of a ZeroMQ URI) at which the
+// destination chateau instance is to be found. 
 //
-// - as_consumer_new
-// - as_connect
+// batchPeriod is the interval at which the worker thread will
+// poll/empty the queue of messages.
+//
+// Wraps C functions from marquise.h:
+//
+// - marquise_consumer_new
+//
+// - marquise_connect
 func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
 	context := new(MarquiseContext)
 	broker := C.CString(zmqBroker)
@@ -39,13 +62,20 @@ func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
 	interval := C.double(batchPeriod)
 	context.consumer = C.marquise_consumer_new(broker, interval)
 	if context.consumer == nil {
-		return *context, newMarquiseContextError(fmt.Sprintf("as_consumer_new(%v, %v) returned NULL", broker, interval))
+		// FIXME: do something useful with errno here
+		return *context, newMarquiseContextError(fmt.Sprintf("marquise_consumer_new(%v, %v) returned NULL", broker, interval))
 	}
 	context.connection = C.marquise_connect(context.consumer)
 	if context.connection == nil {
-		return *context, newMarquiseContextError(fmt.Sprintf("as_connect(%v) returned NULL", context.consumer))
+		// FIXME: do something useful with errno here
+		return *context, newMarquiseContextError(fmt.Sprintf("marquise_connect(%v) returned NULL", context.consumer))
 	}
 	return *context, nil
+}
+
+func (c MarquiseContext) Shutdown() {
+	C.marquise_close(c.connection)
+	C.marquise_consumer_shutdown(c.consumer)
 }
 
 // Translates a map of source tags to an array of CStrings of fields,
