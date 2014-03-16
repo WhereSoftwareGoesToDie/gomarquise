@@ -2,7 +2,7 @@
 # library then you would probably be better off linking to a packaged
 # version of libmarquise.
 
-sudo apt-get install -y autoconf libtool automake build-essential libzmq3-dev libglib2.0-dev libprotobuf-c0-dev protobuf-c-compiler
+sudo apt-get install -y autoconf libtool automake build-essential libglib2.0-dev libprotobuf-c0-dev protobuf-c-compiler
 mkdir -p deps/
 cd deps
 wget http://download.zeromq.org/zeromq-4.0.4.tar.gz
