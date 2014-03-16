@@ -12,7 +12,7 @@ func sendTestMessage(t *testing.T, v int) {
 	if err != nil {
 		t.Errorf("%v", err)
 	}
-	err = os.Setenv("LIBMARQUISE_ORIGIN", "ABCDEF")
+	//err = os.Setenv("LIBMARQUISE_ORIGIN", "ABCDEF")
 	if err != nil {
 		t.Errorf("%v", err)
 	}
