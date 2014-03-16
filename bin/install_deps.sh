@@ -13,6 +13,7 @@ make
 sudo make install
 sudo ldconfig
 cd ..
+find /usr -name "libzmq*" -exec ls -l {} \;
 git clone https://github.com/anchor/libmarquise
 cd libmarquise
 autoreconf -i
