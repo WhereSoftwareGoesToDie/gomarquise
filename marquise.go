@@ -28,7 +28,9 @@ const (
 	Version = "1.1.4"
 )
 
-// Maintains the ZeroMQ context
+// Maintains the ZeroMQ context.
+// Not thread safe due to the underlying libmarquise_consumer not being
+// thread-safe (this will be fixed). 
 type MarquiseContext struct {
 	consumer   C.marquise_consumer
 	connection C.marquise_connection
