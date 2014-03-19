@@ -4,19 +4,10 @@ import (
 	zmq "github.com/pebbe/zmq4"
 	"testing"
 	"time"
-	"os"
 )
 
 func sendTestMessage(t *testing.T, v int) {
-	err := os.Setenv("LIBMARQUISE_DEBUG", "1")
-	if err != nil {
-		t.Errorf("%v", err)
-	}
-	//err = os.Setenv("LIBMARQUISE_ORIGIN", "ABCDEF")
-	if err != nil {
-		t.Errorf("%v", err)
-	}
-	c, err := Dial("ipc:///tmp/gomarquise_full_stack_test", 0.1)
+	c, err := Dial("ipc:///tmp/gomarquise_full_stack_test", 0.1, "ABCDEF", "", true)
 	if err != nil {
 		t.Errorf("%v", err)
 	}

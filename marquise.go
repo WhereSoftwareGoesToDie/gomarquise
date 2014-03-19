@@ -15,6 +15,7 @@ package gomarquise
 
 import (
 	"fmt"
+	"os"
 	"unsafe"
 )
 
@@ -24,7 +25,7 @@ import (
 import "C"
 
 const (
-	Version = "1.0.5"
+	Version = "1.1.4"
 )
 
 // Maintains the ZeroMQ context
@@ -50,12 +51,36 @@ func newMarquiseContextError(msg string) error {
 // batchPeriod is the interval at which the worker thread will
 // poll/empty the queue of messages.
 //
+// debug enables/disables debug output from libmarquise itself.
+//
+// telemetry is a ZMQ endpoint for a Chateau broker to which to send
+// telemetry. Pass an empty string to disable telemetry.
+//
+// origin is a Vaultaire origin.
+//
 // Wraps C functions from marquise.h:
 //
 // - marquise_consumer_new
 //
 // - marquise_connect
-func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
+func Dial(zmqBroker string, batchPeriod float64, origin, telemetry string, debug bool)  (*MarquiseContext, error) {
+	if debug {
+		err := os.Setenv("LIBMARQUISE_DEBUG", "1")
+		if err != nil {
+			return nil, err
+		}
+	}
+	if telemetry != "" {
+		err := os.Setenv("LIBMARQUISE_TELEMETRY_DEST", telemetry)
+		err = os.Setenv("LIBMARQUISE_PROFILING", "1")
+		if err != nil {
+			return nil, err
+		}
+	}
+	err := os.Setenv("LIBMARQUISE_ORIGIN", origin)
+	if err != nil {
+		return nil, err
+	}
 	context := new(MarquiseContext)
 	broker := C.CString(zmqBroker)
 	defer C.free(unsafe.Pointer(broker))
@@ -63,14 +88,14 @@ func Dial(zmqBroker string, batchPeriod float64) (MarquiseContext, error) {
 	context.consumer = C.marquise_consumer_new(broker, interval)
 	if context.consumer == nil {
 		// FIXME: do something useful with errno here
-		return *context, newMarquiseContextError(fmt.Sprintf("marquise_consumer_new(%v, %v) returned NULL", broker, interval))
+		return nil, newMarquiseContextError(fmt.Sprintf("marquise_consumer_new(%v, %v) returned NULL", broker, interval))
 	}
 	context.connection = C.marquise_connect(context.consumer)
 	if context.connection == nil {
 		// FIXME: do something useful with errno here
-		return *context, newMarquiseContextError(fmt.Sprintf("marquise_connect(%v) returned NULL", context.consumer))
+		return nil, newMarquiseContextError(fmt.Sprintf("marquise_connect(%v) returned NULL", context.consumer))
 	}
-	return *context, nil
+	return context, nil
 }
 
 func (c MarquiseContext) Shutdown() {
