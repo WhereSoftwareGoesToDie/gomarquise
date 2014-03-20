@@ -11,6 +11,7 @@ cd zeromq-4.0.4
 ./configure --prefix=/usr
 make
 sudo make install
+sudo ldconfig
 cd ../..
 git clone https://github.com/anchor/libmarquise
 cd libmarquise
