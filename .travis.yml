@@ -7,4 +7,6 @@ install:
 
 env:
   - PATH=$GOPATH/bin:$PATH
+
+script:
   - make all
