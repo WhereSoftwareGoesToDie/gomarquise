@@ -3,3 +3,8 @@ go:
   - 1.2
 install:
   - ./bin/install_deps.sh
+  - go get
+
+env:
+  - PATH=$GOPATH/bin:$PATH
+  - make all
