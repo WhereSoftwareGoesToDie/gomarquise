@@ -4,26 +4,30 @@ go:
   - 1.2
 
 install:
+  - apt-get remove -y libzmq1
   - mkdir -p deps/
   - cd deps
   - wget http://download.zeromq.org/zeromq-4.0.4.tar.gz
   - tar -xf zeromq-4.0.4.tar.gz
   - cd zeromq-4.0.4
-  - ./configure --prefix=/usr
+  - sudo echo '/usr/local/lib' >> /etc/ld.so.conf.d/local.conf
+  - sudo /sbin/ldconfig	
+  - ./configure 
   - make
   - sudo make install
-  - sudo ldconfig
+  - sudo /sbin/ldconfig
   - cd ../
   - sudo apt-get install -y autoconf libtool automake build-essential libglib2.0-dev libprotobuf-c0-dev protobuf-c-compiler
   - git clone https://github.com/anchor/libmarquise
   - cd libmarquise
   - autoreconf -i
-  - ./configure --prefix=/usr && make && make check 
+  - ./configure && make && make check 
   - sudo make install
+  - sudo /sbin/ldconfig
   - cd ../..
 
 env:
-  - PATH=$GOPATH/bin:$PATH
+  - PATH=/usr/sbin:/sbin:$GOPATH/bin:$PATH
 
 script:
   - make all
