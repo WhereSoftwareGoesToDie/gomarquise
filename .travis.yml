@@ -10,7 +10,7 @@ install:
   - wget http://download.zeromq.org/zeromq-4.0.4.tar.gz
   - tar -xf zeromq-4.0.4.tar.gz
   - cd zeromq-4.0.4
-  - sudo echo '/usr/local/lib' >> /etc/ld.so.conf.d/local.conf
+  - sudo su -c 'echo "/usr/local/lib" >> /etc/ld.so.conf.d/local.conf'
   - sudo /sbin/ldconfig	
   - ./configure 
   - make
