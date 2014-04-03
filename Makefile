@@ -3,5 +3,5 @@ all: gomarquise
 gomarquise:
 	go get -t
 	go build
-#	go test -race
+	go test -race
 	go install
