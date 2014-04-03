@@ -1,10 +1,7 @@
 all: gomarquise
 
-gomarquise: testdeps
-	go get
+gomarquise:
+	go get -t
 	go build
 #	go test -race
 	go install
-
-testdeps:
-	go get github.com/pebbe/zmq4
