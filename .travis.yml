@@ -26,10 +26,11 @@ install:
   - sudo make install
   - sudo /sbin/ldconfig
   - cd ../..
-  - sudo go install -a -race std
 
 env:
   - PATH=/usr/sbin:/sbin:$GOPATH/bin:$PATH
 
 script:
+  # this should really be in the install step
+  - sudo go install -a -race std
   - make all
