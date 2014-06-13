@@ -39,9 +39,7 @@ func newMarquiseContextError(msg string) error {
 //
 // Wraps C functions from marquise.h:
 //
-// - marquise_consumer_new
-//
-// - marquise_connect
+// - marquise_init
 func NewMarquiseContext(namespace string) (*MarquiseContext, error) {
 	context := new(MarquiseContext)
 	ns := C.CString(namespace)
@@ -53,6 +51,11 @@ func NewMarquiseContext(namespace string) (*MarquiseContext, error) {
 	return context, nil
 }
 
+// Shutdown flushes and closes the spool.
+//
+// Wraps C functions from marquise.h:
+//
+// - marquise_shutdown
 func (c MarquiseContext) Shutdown() {
 	C.marquise_shutdown(c.ctx)
 }
