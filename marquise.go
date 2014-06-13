@@ -26,6 +26,15 @@ type MarquiseContext struct {
 	ctx *C.marquise_ctx
 }
 
+// Address is a Vaultaire address, which consists of a 64-bit word; the
+// most significant 63 bits are the unique-identifier part, and the
+// least significant bit is a flag used internally to signify an
+// extended dataframe. Addresses are obtained from HashIdentifier, 
+// and must be unique per-origin. 
+//
+// FIXME: write real docs and link them here.
+type Address uint64
+
 // NewMarquiseContext takes a string representing the Marquise
 // namespace (this must be unique per-host). 
 //
@@ -60,11 +69,11 @@ func (c MarquiseContext) Shutdown() {
 // - marquise_hash_identifier
 //
 // [0] https://131002.net/siphash/
-func HashIdentifier(id string) uint64 {
+func HashIdentifier(id string) Address {
 	id_ := C.CString(id)
 	defer C.free(unsafe.Pointer(id_))
 	idLen := C.size_t(len(id))
-	return uint64(C.marquise_hash_identifier(id_, idLen))
+	return Address(C.marquise_hash_identifier(id_, idLen))
 }
 
 // SendSimple queues a word64 datapoint for transmission by the 
@@ -73,7 +82,7 @@ func HashIdentifier(id string) uint64 {
 // Wraps C functions from marquise.h:
 //
 // - marquise_send_simple
-func (c MarquiseContext) SendSimple(address, timestamp, value uint64) error {
+func (c MarquiseContext) SendSimple(address Address, timestamp, value uint64) error {
 	ret := C.marquise_send_simple(c.ctx, C.uint64_t(address), C.uint64_t(timestamp), C.uint64_t(value))
 	if ret != 0 {
 		return fmt.Errorf("marquise_send_simple(%v, %v, %v, %v) returned %v", c.ctx, address, timestamp, value)
@@ -87,7 +96,7 @@ func (c MarquiseContext) SendSimple(address, timestamp, value uint64) error {
 // Wraps C functions from marquise.h:
 //
 // - marquise_send_extended
-func (c MarquiseContext) SendExtended(address, timestamp uint64, value string) error {
+func (c MarquiseContext) SendExtended(address Address, timestamp uint64, value string) error {
 	cVal := C.CString(value)
 	defer C.free(unsafe.Pointer(cVal))
 	cLen := C.size_t(len(value))
