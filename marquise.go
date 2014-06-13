@@ -26,14 +26,6 @@ type MarquiseContext struct {
 	ctx *C.marquise_ctx
 }
 
-func newMarquiseWriteError(ret int, address, value uint64) error {
-	return fmt.Errorf("libmarquise returned %v whilst trying to write frame with value %v to address %v", ret, value, address)
-}
-
-func newMarquiseContextError(msg string) error {
-	return fmt.Errorf("Error initializing libmarquise context: %v", msg)
-}
-
 // NewMarquiseContext takes a string representing the Marquise
 // namespace (this must be unique per-host). 
 //
@@ -46,7 +38,7 @@ func NewMarquiseContext(namespace string) (*MarquiseContext, error) {
 	defer C.free(unsafe.Pointer(ns))
 	context.ctx = C.marquise_init(ns)
 	if context.ctx == nil {
-		return nil, newMarquiseContextError(fmt.Sprintf("marquise_init(%v) returned NULL", namespace))
+		return nil, fmt.Errorf("marquise_init(%v) returned NULL", namespace)
 	}
 	return context, nil
 }
@@ -84,7 +76,7 @@ func HashIdentifier(id string) uint64 {
 func (c MarquiseContext) SendSimple(address, timestamp, value uint64) error {
 	ret := C.marquise_send_simple(c.ctx, C.uint64_t(address), C.uint64_t(timestamp), C.uint64_t(value))
 	if ret != 0 {
-		return newMarquiseWriteError(int(ret), address, value)
+		return fmt.Errorf("marquise_send_simple(%v, %v, %v, %v) returned %v", c.ctx, address, timestamp, value)
 	}
 	return nil
 }
