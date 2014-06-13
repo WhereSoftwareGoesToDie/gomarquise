@@ -25,7 +25,7 @@ import (
 import "C"
 
 const (
-	Version = "1.1.4"
+	Version = "1.1.5"
 )
 
 // Maintains the ZeroMQ context.
