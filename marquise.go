@@ -88,3 +88,17 @@ func (c MarquiseContext) SendSimple(address, timestamp, value uint64) error {
 	}
 	return nil
 }
+
+// Flush ensures written datapoints are written to disk. This is just
+// a wrapper for fflush(2) and you probably don't need to call it.
+//
+// Wraps C functions from marquise.h:
+//
+// - marquise_flush
+func (c MarquiseContext) Flush() error {
+	ret := C.marquise_flush(c.ctx)
+	if ret != 0 {
+		return fmt.Errorf("marquise_flush() returned %v", ret)
+	}
+	return nil
+}
