@@ -21,7 +21,11 @@ const (
 	Version = "2.0.0alpha1"
 )
 
-// Maintains the ZeroMQ context.
+// MarquiseContext maintains the spool file handle.
+//
+// Wraps C types from marquise.h:
+//
+// - marquise_ctx
 type MarquiseContext struct {
 	ctx *C.marquise_ctx
 }
