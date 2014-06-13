@@ -89,6 +89,23 @@ func (c MarquiseContext) SendSimple(address, timestamp, value uint64) error {
 	return nil
 }
 
+// SendExtended queues a string datapoint for transmission by the
+// Marquise daemon. address is the value returned by HashIdentifier.
+//
+// Wraps C functions from marquise.h:
+//
+// - marquise_send_extended
+func (c MarquiseContext) SendExtended(address, timestamp uint64, value string) error {
+	cVal := C.CString(value)
+	defer C.free(unsafe.Pointer(cVal))
+	cLen := C.size_t(len(value))
+	ret := C.marquise_send_extended(c.ctx, C.uint64_t(address), C.uint64_t(timestamp), cVal, cLen)
+	if ret != 0 {
+		return fmt.Errorf("marquise_send_extended(%v, %v, %v, %v, %v) returned %v", c.ctx, address, timestamp, value, len(value))
+	}
+	return nil
+}
+
 // Flush ensures written datapoints are written to disk. This is just
 // a wrapper for fflush(2) and you probably don't need to call it.
 //
