@@ -26,8 +26,8 @@ type MarquiseContext struct {
 	ctx *C.marquise_ctx
 }
 
-func newMarquiseWriteError(ret int, value string) error {
-	return fmt.Errorf("libmarquise returned %v whilst trying to write frame with value %v", ret, value)
+func newMarquiseWriteError(ret int, address, value uint64) error {
+	return fmt.Errorf("libmarquise returned %v whilst trying to write frame with value %v to address %v", ret, value, address)
 }
 
 func newMarquiseContextError(msg string) error {
@@ -73,4 +73,18 @@ func HashIdentifier(id string) uint64 {
 	defer C.free(unsafe.Pointer(id_))
 	idLen := C.size_t(len(id))
 	return uint64(C.marquise_hash_identifier(id_, idLen))
+}
+
+// SendSimple queues a word64 datapoint for transmission by the 
+// Marquise daemon. address is the value returned by HashIdentifier.
+//
+// Wraps C functions from marquise.h:
+//
+// - marquise_send_simple
+func (c MarquiseContext) SendSimple(address, timestamp, value uint64) error {
+	ret := C.marquise_send_simple(c.ctx, C.uint64_t(address), C.uint64_t(timestamp), C.uint64_t(value))
+	if ret != 0 {
+		return newMarquiseWriteError(int(ret), address, value)
+	}
+	return nil
 }
