@@ -22,8 +22,6 @@ const (
 )
 
 // Maintains the ZeroMQ context.
-// Not thread safe due to the underlying libmarquise_consumer not being
-// thread-safe (this will be fixed). 
 type MarquiseContext struct {
 	ctx *C.marquise_ctx
 }
