@@ -60,3 +60,17 @@ func (c MarquiseContext) Shutdown() {
 	C.marquise_shutdown(c.ctx)
 }
 
+// Return the SipHash-2-4[0] of the supplied identifier string (must be
+// unique per-origin).
+//
+// Wraps C functions from marquise.h:
+//
+// - marquise_hash_identifier
+//
+// [0] https://131002.net/siphash/
+func HashIdentifier(id string) uint64 {
+	id_ := C.CString(id)
+	defer C.free(unsafe.Pointer(id_))
+	idLen := C.size_t(len(id))
+	return uint64(C.marquise_hash_identifier(id_, idLen))
+}
