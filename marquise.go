@@ -2,13 +2,6 @@
 The gomarquise package consists of a set of bindings (using CGo) for the
 libmarquise[0] metric writer library.
 
-libmarquise recognizes two environment variables:
-
- - LIBMARQUISE_ORIGIN specifies the origin value for the generated
-   DataFrames. This variable is required.
- - LIBMARQUISE_DEBUG enables debugging output from the library if
-   defined.
-
 [0] https://github.com/anchor/libmarquise
 */
 package gomarquise
@@ -25,7 +18,7 @@ import (
 import "C"
 
 const (
-	Version = "1.1.4"
+	Version = "2.0.0"
 )
 
 // Maintains the ZeroMQ context.
